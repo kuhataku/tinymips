@@ -16,11 +16,19 @@ module top (
    wire [ 31 : 0] writedata;
    wire [ 31 : 0] readdata;
    wire [ 2 : 0 ] alu_control;
+   wire [ 4 : 0 ] rf_a1;
+   wire [ 4 : 0 ] rf_a2;
+   wire [ 4 : 0 ] rf_a3;
    wire alu_src;
    wire mem2reg;
+   wire regdst;
 
+   assign rf_a1 = instr[25:21];
+   assign rf_a2 = instr[20:16];
+   assign rf_a3 = regdst ? instr[15:11] : instr[20:16];
    assign srcb =  alu_src ? sign_imm : reg_rd2;
    assign result = mem2reg ?  readdata : alu_result;
+
 
    rom imem(.A(PC), .RD(instr));
    regfile32x32 rf(.CLK(CLK), .A1(instr[25:21]), .A2(instr[20:16]), .A3(instr[20:16]), .WD3(readdata), .WE3(regwrite), .RD1(reg_rd1), .RD2(reg_rd2));
