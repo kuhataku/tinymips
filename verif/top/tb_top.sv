@@ -19,12 +19,12 @@ module tb_top (
       end
    end
 
-   initial begin
+   task resetall;
       #0;
       RST = 1;
       #5;
       RST = 0;
-   end
+   endtask
 
    function [ 31 : 0 ]lw_op;
       input [ 4 : 0 ] rs;
@@ -88,13 +88,9 @@ module tb_top (
       release `TOP_LEVEL.instr;
       release `TOP_LEVEL.mem2reg;
    endtask
-
-   // initial begin
-   //    if ( `TOP_LEVEL. )
-   //
-   // end
-   //
+ 
    initial begin
+      resetall();
       $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
       // $readmemh("imem.h", `TOP_LEVEL.rf.regfile);
       for (int i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
@@ -106,9 +102,11 @@ module tb_top (
       test_lw();
       test_sw();
       #10;
-      $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
-      $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
+      resetall();
+      // test_r_irs();
       $finish;
+      // $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
+      // $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
    end
 
    initial begin
