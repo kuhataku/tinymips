@@ -75,7 +75,6 @@ module tb_top (
       @(posedge CLK)
       $display("%x",`TOP_LEVEL.dmem.memory[32'd4]);
       for (int i = 0; i < 5; i = i + 1) begin
-         $display("%x %x, %b %b",  `TOP_LEVEL.rf.regfile[4 - i] , `TOP_LEVEL.dmem.memory[i] , 4-i,i );
          if( `TOP_LEVEL.rf.regfile[4 - i] !== `TOP_LEVEL.dmem.memory[i] ) begin
             $error("SW operation is invalid.");
             $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
