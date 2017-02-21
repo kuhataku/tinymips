@@ -34,7 +34,7 @@ module top (
    assign result = mem2reg ?  readdata : alu_result;
    assign PCPLUS4 = PC + 4;
    assign PCBranch = ( sign_imm << 2 ) + PCPLUS4;
-   assign PCSrc = zero * branch;
+   assign PCSrc = zero & branch;
    assign NextPC = PCSrc ? PCBranch : PCPLUS4;
 
 
