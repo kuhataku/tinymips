@@ -26,7 +26,11 @@ module top (
    wire regdst;
    wire branch;
    wire PCSrc;
+   wire [ 5 : 0 ] op;
+   wire [ 5 : 0 ] funct;
 
+   assign op = instr[31:26];
+   assign funct = instr[5:0];
    assign rf_a1 = instr[25:21];
    assign rf_a2 = instr[20:16];
    assign rf_a3 = regdst ? instr[15:11] : instr[20:16];
@@ -43,6 +47,8 @@ module top (
    ram dmem(.CLK(CLK), .A(alu_result), .WD(reg_rd2), .WE(memwrite), .RD(readdata));
    sign_extend se(.extend_in(instr[15:0]), .extend_out(sign_imm));
    alu alu(.srca(reg_rd1), .srcb(sign_imm), .alu_control(alu_control), .zero(zero), .alu_result(alu_result));
+   controller controller(.OP(op), .Funct(funct), .Mem2Reg(mem2reg), .MemWrite(memwrite), .Branch(branch), .ALUControl(alu_control), .ALUSrc(alu_src), .RegDst(regdst), .RegWrite(regwrite));
+
 
    always@(posedge CLK) begin
       if(RST) begin
