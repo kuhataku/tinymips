@@ -15,7 +15,7 @@ comp:
 run:
 	mkdir -p logs
 	./${TARGET}  +VCDNAME=${VCDNAME} | tee logs/${TARGET}.log
-	mv *.out.h *.vcd logs
+	mv *.vcd logs
 
 clean:
 	-${RM} ${TARGET}
