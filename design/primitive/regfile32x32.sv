@@ -1,15 +1,18 @@
-module regfile32x32 (
+module regfile32x32 #(
+   parameter ADDR_WIDTH = 5,
+   parameter DATA_WIDTH = 32
+)(
    input CLK,
-   input [ 4 : 0 ]A1,
-   input [ 4 : 0 ]A2,
-   input [ 4 : 0 ]A3,
-   input [ 31 : 0 ] WD3,
+   input [ ADDR_WIDTH - 1 : 0 ] A1,
+   input [ ADDR_WIDTH - 1 : 0 ] A2,
+   input [ ADDR_WIDTH - 1 : 0 ] A3,
+   input [ DATA_WIDTH - 1 : 0 ] WD3,
    input WE3,
-   output [ 31 : 0 ] RD1,
-   output [ 31 : 0 ] RD2
+   output [ DATA_WIDTH - 1 : 0 ] RD1,
+   output [ DATA_WIDTH - 1 : 0 ] RD2
 );
 
-   reg [ 31 : 0 ] regfile [ 0 : 31 ];
+   logic [ DATA_WIDTH - 1 : 0 ] regfile [ 0 : DATA_WIDTH - 1 ];
    assign RD1 = regfile[A1];
    assign RD2 = regfile[A2];
 

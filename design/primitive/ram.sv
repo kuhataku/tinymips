@@ -1,11 +1,15 @@
-module ram (
+module ram #(
+   parameter ADDR_WIDTH = 32,
+   parameter DATA_WIDTH = 32,
+   parameter DATA_DEPTH = 4096
+)(
    input CLK,
-   input [ 31 : 0 ] A,
-   input [ 31 : 0 ] WD,
+   input [ ADDR_WIDTH - 1 : 0 ] A,
+   input [ DATA_WIDTH - 1 : 0 ] WD,
    input WE,
-   output [ 31 : 0 ] RD
+   output [ DATA_WIDTH - 1 : 0 ] RD
 );
-   reg [ 31 : 0 ] memory [ 0 : 4095 ];
+   reg [ DATA_WIDTH - 1 : 0 ] memory [ 0 : DATA_DEPTH - 1 ];
 
    assign RD = memory[A];
 

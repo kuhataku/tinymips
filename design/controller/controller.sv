@@ -1,19 +1,12 @@
 module controller(
   input [ 5 : 0 ] OP,
   input [ 5 : 0 ] Funct,
-  output Mem2Reg,
-  output MemWrite,
-  output Branch,
-  output [ 2 : 0 ]ALUControl,
-  output ALUSrc,
-  output RegDst,
-  output RegWrite
+  output control_sig_t control_sig
 );
 
   wire [ 1 : 0 ] ALUOp;
 
-  assign {RegWrite, RegDst, ALUSrc, Branch, MemWrite, Mem2Reg, ALUOp} = 
-    main_decoder(OP);
+  assign control_sig = main_decoder(OP);
   assign ALUControl = alu_decoder(ALUOp, Funct);
 
 

@@ -13,10 +13,13 @@ module alu (
       input [ 31 : 0 ] srcb;
       input [  2 : 0 ] alu_control;
       begin
-         if ( alu_control == 3'b010 )
-            alu_body = srca + srcb;
-         else
-            alu_body = 0; //T.B.D.
+         case(alu_control)
+            3'b010: alu_body = srca + srcb;
+            3'b110: alu_body = srca - srcb;
+            3'b010: alu_body = 0;
+            3'b010: alu_body = 0;
+            default: alu_body = 3'bxxx;
+         endcase //(alu_control)
       end
    endfunction //alu_body
    
