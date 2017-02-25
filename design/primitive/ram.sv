@@ -1,7 +1,7 @@
 module ram (
    input CLK,
    input [ 31 : 0 ] A,
-   inout [ 31 : 0 ] WD,
+   input [ 31 : 0 ] WD,
    input WE,
    output [ 31 : 0 ] RD
 );
