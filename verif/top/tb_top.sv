@@ -46,8 +46,8 @@ module tb_top (
    
    task test_lw;
       force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.regwrite = 1'b1;
-      force `TOP_LEVEL.memwrite = 1'b0;
+      force `TOP_LEVEL.control_sig.regwrite = 1'b1;
+      force `TOP_LEVEL.control_sig.memwrite = 1'b0;
       for (int i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = lw_op(i,i,i); @(posedge CLK);
          $display("Load memory[%x] to register[%x]", `TOP_LEVEL.rf.A1, `TOP_LEVEL.rf.A3);
@@ -58,15 +58,15 @@ module tb_top (
          end
       end
       release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.regwrite;
-      release `TOP_LEVEL.memwrite;
+      release `TOP_LEVEL.control_sig.regwrite;
+      release `TOP_LEVEL.control_sig.memwrite;
       release `TOP_LEVEL.instr;
    endtask
 
    task test_sw;
       force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.regwrite = 1'b0;
-      force `TOP_LEVEL.memwrite = 1'b1;
+      force `TOP_LEVEL.control_sig.regwrite = 1'b0;
+      force `TOP_LEVEL.control_sig.memwrite = 1'b1;
       force `TOP_LEVEL.mem2reg = 1'b0;
       for (int i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = sw_op(i + 5, 4 - i, i); @(posedge CLK);
@@ -82,8 +82,8 @@ module tb_top (
          end
       end
       release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.regwrite;
-      release `TOP_LEVEL.memwrite;
+      release `TOP_LEVEL.control_sig.regwrite;
+      release `TOP_LEVEL.control_sig.memwrite;
       release `TOP_LEVEL.instr;
       release `TOP_LEVEL.mem2reg;
    endtask
