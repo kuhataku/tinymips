@@ -45,15 +45,16 @@ module tb_top (
    endfunction //lw_asm
    
    task test_lw;
+      int i;
       force `TOP_LEVEL.alu_control = 3'b010;
       force `TOP_LEVEL.regwrite = 1'b1;
       force `TOP_LEVEL.memwrite = 1'b0;
-      for (int i = 0; i < 5; i = i + 1) begin
+      for (i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = lw_op(i,i,i); @(posedge CLK);
          $display("Load memory[%x] to register[%x]", `TOP_LEVEL.rf.A1, `TOP_LEVEL.rf.A3);
       end
-      for (int i = 0; i < 5; i = i + 1) begin
-         if( `TOP_LEVEL.rf.regfile[i] !== `TOP_LEVEL.dmem.memory[i] ) begin
+      for (i = 0; i < 5; i = i + 1) begin
+         assert( `TOP_LEVEL.rf.regfile[i] !== `TOP_LEVEL.dmem.memory[i] ) begin
             $error("LW operation is invalid.");
          end
       end
@@ -64,18 +65,19 @@ module tb_top (
    endtask
 
    task test_sw;
+      int i;
       force `TOP_LEVEL.alu_control = 3'b010;
       force `TOP_LEVEL.regwrite = 1'b0;
       force `TOP_LEVEL.memwrite = 1'b1;
       force `TOP_LEVEL.mem2reg = 1'b0;
-      for (int i = 0; i < 5; i = i + 1) begin
+      for (i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = sw_op(i + 5, 4 - i, i); @(posedge CLK);
          $display("Store register[%x] to memory[%x]", `TOP_LEVEL.rf.A2, `TOP_LEVEL.dmem.A);
       end
       @(posedge CLK)
       $display("%x",`TOP_LEVEL.dmem.memory[32'd4]);
-      for (int i = 0; i < 5; i = i + 1) begin
-         if( `TOP_LEVEL.rf.regfile[4 - i] !== `TOP_LEVEL.dmem.memory[i] ) begin
+      for (i = 0; i < 5; i = i + 1) begin
+         assert( `TOP_LEVEL.rf.regfile[4 - i] !== `TOP_LEVEL.dmem.memory[i] ) begin
             $error("SW operation is invalid.");
             $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
             $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
@@ -89,10 +91,11 @@ module tb_top (
    endtask
  
    initial begin
+      int i;
       resetall();
       $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
       // $readmemh("imem.h", `TOP_LEVEL.rf.regfile);
-      for (int i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
+      for (i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
          `TOP_LEVEL.dmem.memory[i] = $urandom();
       end
       // $readmemh("dmem.h", `TOP_LEVEL.dmem.memory);
