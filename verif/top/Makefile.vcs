@@ -1,0 +1,22 @@
+.PHONY: all
+
+TARGET=top
+RTLLIST= ${WORKSPACE}/design/top/top.sv ${WORKSPACE}/design/alu/alu.sv ${WORKSPACE}/design/primitive/*  ${WORKSPACE}/design/controller/controller.sv
+TBLIST=test_top.sv tb_top.sv dut_top.sv
+VCS_OPTIONS=-sverilog -o ${TARGET} +incdir+${WORKSPACE}/design/include
+VCDNAME=${TARGET}.vcd
+
+
+all: comp run
+
+comp:
+	vcs ${VCS_OPTIONS} ${TBLIST} ${RTLLIST}
+
+run:
+	mkdir -p logs
+	./${TARGET}  +VCDNAME=${VCDNAME} | tee logs/${TARGET}.log
+	mv *.out.h *.vcd logs
+
+clean:
+	-${RM} ${TARGET}
+	-${RM} -r logs csrc top.daidir verdiLog top.vdb
