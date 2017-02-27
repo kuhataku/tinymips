@@ -12,13 +12,14 @@ module regfile32x32 #(
    output [ DATA_WIDTH - 1 : 0 ] RD2
 );
 
+   parameter DLY=1;
    logic [ DATA_WIDTH - 1 : 0 ] regfile [ 0 : DATA_WIDTH - 1 ];
    assign RD1 = regfile[A1];
    assign RD2 = regfile[A2];
 
    always@(posedge CLK) begin
       if( WE3 ) begin
-         regfile[A3] = WD3;
+         regfile[A3] <= #DLY WD3;
       end
    end
 

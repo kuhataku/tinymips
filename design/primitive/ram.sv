@@ -9,13 +9,14 @@ module ram #(
    input WE,
    output [ DATA_WIDTH - 1 : 0 ] RD
 );
+   parameter DLY=1;
    reg [ DATA_WIDTH - 1 : 0 ] memory [ 0 : DATA_DEPTH - 1 ];
 
    assign RD = memory[A];
 
    always@(posedge CLK) begin
       if(WE) begin
-      memory[A] <= WD;
+         memory[A] <= #DLY WD;
       end
    end
    

@@ -46,30 +46,19 @@ module tb_top (
    
    task test_lw;
       int i;
-      force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.control_sig.regwrite = 1'b1;
-      force `TOP_LEVEL.control_sig.memwrite = 1'b0;
       for (i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = lw_op(i,i,i); @(posedge CLK);
          $display("Load memory[%x] to register[%x]", `TOP_LEVEL.rf.A1, `TOP_LEVEL.rf.A3);
       end
       for (i = 0; i < 5; i = i + 1) begin
-         assert( `TOP_LEVEL.rf.regfile[i] !== `TOP_LEVEL.dmem.memory[i] ) begin
-            $error("LW operation is invalid.");
-         end
+         assert( `TOP_LEVEL.rf.regfile[i] === `TOP_LEVEL.dmem.memory[i] ) 
+         else $error("LW operation is invalid. regfile[%d]=%d, memory[%d]=%d", i, `TOP_LEVEL.rf.regfile[i], i, `TOP_LEVEL.dmem.memory[i]);
       end
-      release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.control_sig.regwrite;
-      release `TOP_LEVEL.control_sig.memwrite;
       release `TOP_LEVEL.instr;
    endtask
 
    task test_sw;
       int i;
-      force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.control_sig.regwrite = 1'b0;
-      force `TOP_LEVEL.control_sig.memwrite = 1'b1;
-      force `TOP_LEVEL.mem2reg = 1'b0;
       for (i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = sw_op(i + 5, 4 - i, i); @(posedge CLK);
          $display("Store register[%x] to memory[%x]", `TOP_LEVEL.rf.A2, `TOP_LEVEL.dmem.A);
@@ -83,11 +72,7 @@ module tb_top (
             $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
          end
       end
-      release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.control_sig.regwrite;
-      release `TOP_LEVEL.control_sig.memwrite;
       release `TOP_LEVEL.instr;
-      release `TOP_LEVEL.mem2reg;
    endtask
  
    initial begin
