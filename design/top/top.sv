@@ -6,10 +6,12 @@ module top (
    reg [ 31 : 0 ] PC;
    wire [ 31 : 0 ] PCPLUS4;
    wire [ 31 : 0 ] PCBranch;
+   wire [ 29 : 0 ] pc_jump;
    wire [ 31 : 0 ] instr;
    wire [ 31 : 0 ] sign_imm;
    wire regwrite;
    wire memwrite;
+   wire jump;
    wire [ 16 : 0 ] imm;
    wire [ 31 : 0 ] result;
    wire [ 31 : 0 ] alu_result;
@@ -36,13 +38,14 @@ module top (
    assign rf_a1 = instr[25:21];
    assign rf_a2 = instr[20:16];
    assign rf_a3 = regdst ? instr[15:11] : instr[20:16];
+   assign pc_jump ={PC[31:28], instr[25:0]};
    assign srcb =  alu_src ? sign_imm : rf_rd2;
    assign result = mem2reg ?  readdata : alu_result;
    assign imm = instr[15:0];
    assign PCPLUS4 = PC + 4;
    assign PCBranch = ( sign_imm << 2 ) + PCPLUS4;
    assign PCSrc = zero & branch;
-   assign NextPC = PCSrc ? PCBranch : PCPLUS4;
+   assign NextPC = jump ? pc_jump : (PCSrc ? PCBranch : PCPLUS4);
 
 
    rom imem(
@@ -91,7 +94,8 @@ module top (
      .ALUControl(alu_control),
      .ALUSrc(alu_src),
      .RegDst(regdst),
-     .RegWrite(regwrite)
+     .RegWrite(regwrite),
+     .JUMP(jump)
    );
 
 

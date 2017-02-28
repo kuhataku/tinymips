@@ -7,26 +7,28 @@ module controller(
   output [ 2 : 0 ]ALUControl,
   output ALUSrc,
   output RegDst,
-  output RegWrite
+  output RegWrite,
+  output JUMP
 );
 
   wire [ 1 : 0 ] ALUOp;
 
-  assign {RegWrite, RegDst, ALUSrc, Branch, MemWrite, Mem2Reg, ALUOp} = 
+  assign {RegWrite, RegDst, ALUSrc, Branch, MemWrite, Mem2Reg, ALUOp, JUMP} = 
     main_decoder(OP);
   assign ALUControl = alu_decoder(ALUOp, Funct);
 
 
-  function [ 7 : 0 ] main_decoder;
+  function [ 8 : 0 ] main_decoder;
     input [ 5 : 0 ] opcode;
     begin
       casex (opcode)
-        6'b000000: main_decoder = 8'b11000010;
-        6'b100011: main_decoder = 8'b10100100;
-        6'b101011: main_decoder = 8'b0x101x00;
-        6'b000100: main_decoder = 8'b0x010x01;
-        6'b001000: main_decoder = 8'b10100000;
-        default : main_decoder = 8'bxxxxxxxx;
+        6'b000000: main_decoder = 9'b110000100;
+        6'b100011: main_decoder = 9'b101001000;
+        6'b101011: main_decoder = 9'b0x101x000;
+        6'b000100: main_decoder = 9'b0x010x010;
+        6'b001000: main_decoder = 9'b101000000;
+        6'b000010: main_decoder = 9'b0xxx0xxx1;
+        default : main_decoder = 9'bxxxxxxxxx;
       endcase
     end
   endfunction
