@@ -51,7 +51,7 @@ module top (
    controller controller(.OP(op), .Funct(funct), .Mem2Reg(mem2reg), .MemWrite(memwrite), .Branch(branch), .ALUControl(alu_control), .ALUSrc(alu_src), .RegDst(regdst), .RegWrite(regwrite));
 
 
-   always@(posedge CLK) begin
+   always@(posedge CLK or posedge RST) begin
       if(RST) begin
          PC <= 0;
       end else begin
