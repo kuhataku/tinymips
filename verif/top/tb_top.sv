@@ -100,10 +100,12 @@ localparam sub_funct = 6'd34;
    task test_r_irs;
       $readmemh("reg_r_test.h", `TOP_LEVEL.rf.regfile);
       force `TOP_LEVEL.instr = r_op(0,1,2,0,add_funct); @(posedge CLK);
+      if( `TOP_LEVEL.rf.WD3 !== 'd8 ) begin $error("Add operation is invalid."); end
       force `TOP_LEVEL.instr = r_op(0,1,2,0,sub_funct); @(posedge CLK);
-      force `TOP_LEVEL.instr = i_op(32'b000_1000,0,2,10);@(posedge CLK);
+      if( `TOP_LEVEL.rf.WD3 !== 'd2 ) begin $error("Sub operation is invalid."); end
+      force `TOP_LEVEL.instr = i_op(32'b000_1000,0,2,10); @(posedge CLK);
+      if( `TOP_LEVEL.rf.WD3 !== 'd15 ) begin $error("Addi operation is invalid."); end
    endtask
-
  
    initial begin
       resetall();
