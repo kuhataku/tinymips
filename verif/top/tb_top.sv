@@ -4,6 +4,8 @@ module tb_top (
 );
 
 `define TOP_LEVEL test_top.dut_top.DUT
+localparam add_funct = 6'd32;
+localparam sub_funct = 6'd34;
 
    logic [31:0] data1;
    logic [31:0] data2;
@@ -43,11 +45,29 @@ module tb_top (
          sw_op = 32'hAC00_0000 | ( rs << 21 ) | ( rt << 16 ) | imm;
       end
    endfunction //lw_asm
+
+   function [ 31 : 0 ] r_op;
+      input [ 4 : 0  ] rs;
+      input [ 4 : 0  ] rt;
+      input [ 4 : 0  ] rd;
+      input [ 4 : 0  ] shamt;
+      input [ 5 : 0  ] funct;
+      begin
+         r_op = ( rs << 21 ) | ( rt << 16 ) | ( rd << 11 ) | ( shamt << 6 ) | funct;
+      end
+   endfunction
+
+   function [ 31 : 0 ] i_op;
+      input [ 5 : 0 ] op;
+      input [ 4 : 0 ] rs;
+      input [ 4 : 0 ] rt;
+      input [ 15 : 0 ] imm;
+      begin
+         i_op = ( op << 26) | ( rs << 21 ) | ( rt << 16 ) | imm;
+      end
+   endfunction
    
    task test_lw;
-      force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.regwrite = 1'b1;
-      force `TOP_LEVEL.memwrite = 1'b0;
       for (int i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = lw_op(i,i,i); @(posedge CLK);
          $display("Load memory[%x] to register[%x]", `TOP_LEVEL.rf.A1, `TOP_LEVEL.rf.A3);
@@ -57,17 +77,10 @@ module tb_top (
             $error("LW operation is invalid.");
          end
       end
-      release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.regwrite;
-      release `TOP_LEVEL.memwrite;
       release `TOP_LEVEL.instr;
    endtask
 
    task test_sw;
-      force `TOP_LEVEL.alu_control = 3'b010;
-      force `TOP_LEVEL.regwrite = 1'b0;
-      force `TOP_LEVEL.memwrite = 1'b1;
-      force `TOP_LEVEL.mem2reg = 1'b0;
       for (int i = 0; i < 5; i = i + 1) begin
          force `TOP_LEVEL.instr = sw_op(i + 5, 4 - i, i); @(posedge CLK);
          $display("Store register[%x] to memory[%x]", `TOP_LEVEL.rf.A2, `TOP_LEVEL.dmem.A);
@@ -81,12 +94,16 @@ module tb_top (
             $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
          end
       end
-      release `TOP_LEVEL.alu_control;
-      release `TOP_LEVEL.regwrite;
-      release `TOP_LEVEL.memwrite;
       release `TOP_LEVEL.instr;
-      release `TOP_LEVEL.mem2reg;
    endtask
+
+   task test_r_irs;
+      $readmemh("reg_r_test.h", `TOP_LEVEL.rf.regfile);
+      force `TOP_LEVEL.instr = r_op(0,1,2,0,add_funct); @(posedge CLK);
+      force `TOP_LEVEL.instr = r_op(0,1,2,0,sub_funct); @(posedge CLK);
+      force `TOP_LEVEL.instr = i_op(32'b000_1000,0,2,10);@(posedge CLK);
+   endtask
+
  
    initial begin
       resetall();
@@ -102,7 +119,8 @@ module tb_top (
       test_sw();
       #10;
       resetall();
-      // test_r_irs();
+      test_r_irs();
+      #10;
       $finish;
       // $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
       // $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
