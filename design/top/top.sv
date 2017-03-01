@@ -5,6 +5,7 @@ module top (
 
    reg [ 31 : 0 ] PC;
    wire [ 31 : 0 ] PCPLUS4;
+   wire [ 31 : 0 ] NextPC;
    wire [ 31 : 0 ] PCBranch;
    wire [ 31 : 0 ] instr;
    wire [ 31 : 0 ] sign_imm;
