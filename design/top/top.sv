@@ -11,7 +11,7 @@ module top (
    wire [ 31 : 0 ] sign_imm;
    wire regwrite;
    wire memwrite;
-   wire [ 16 : 0 ] imm;
+   wire [ 15 : 0 ] imm;
    wire [ 31 : 0 ] result;
    wire [ 31 : 0 ] alu_result;
    wire zero;

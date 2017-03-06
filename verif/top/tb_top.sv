@@ -102,11 +102,13 @@ localparam sub_funct = 6'd34;
       force `TOP_LEVEL.instr = r_op(0,1,2,0,add_funct); @(posedge CLK);
       force `TOP_LEVEL.instr = r_op(0,1,2,0,sub_funct); @(posedge CLK);
       force `TOP_LEVEL.instr = i_op(32'b000_1000,0,2,10);@(posedge CLK);
+      release `TOP_LEVEL.instr;
    endtask
 
  
    initial begin
       resetall();
+      $monitor("instr:%x",`TOP_LEVEL.instr);
       $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
       // $readmemh("imem.h", `TOP_LEVEL.rf.regfile);
       for (int i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
@@ -121,9 +123,14 @@ localparam sub_funct = 6'd34;
       resetall();
       test_r_irs();
       #10;
-      $finish;
+      $readmemh("imem.h", `TOP_LEVEL.imem.memory);
+      $readmemh("dmem.h", `TOP_LEVEL.dmem.memory);
+      $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
+      resetall();
+      #50;
       // $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
-      // $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
+      $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
+      $finish;
    end
 
    initial begin
