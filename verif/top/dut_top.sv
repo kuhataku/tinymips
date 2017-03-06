@@ -3,5 +3,6 @@ module dut_top (
    input RST
 );
    top DUT(.*);
+   mult_top MULT_DUT(.*);
 
 endmodule//dut_top
