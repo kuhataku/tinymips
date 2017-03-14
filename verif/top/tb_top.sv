@@ -1,9 +1,14 @@
 module tb_top (
-   output reg CLK,
-   output reg RST
+   output CLK,
+   output RST
 );
 
+
+   tb_ctrl tb_ctrl(.*);
+
 `define TOP_LEVEL test_top.dut_top.DUT
+`define MULT_TOP_LEVEL test_top.dut_top.MULT_DUT
+`define TB_TOP_LEVEL test_top.tb_top
 localparam add_funct = 6'd32;
 localparam sub_funct = 6'd34;
 
@@ -11,22 +16,6 @@ localparam sub_funct = 6'd34;
    logic [31:0] data2;
    logic [4:0] addr1;
    logic [4:0] addr2;
-
-   initial begin
-      #0;
-      CLK = 0;
-      forever begin
-         #2;
-         CLK <= ~CLK;
-      end
-   end
-
-   task resetall;
-      #0;
-      RST = 1;
-      #5;
-      RST = 0;
-   endtask
 
    function [ 31 : 0 ]lw_op;
       input [ 4 : 0 ] rs;
@@ -104,32 +93,43 @@ localparam sub_funct = 6'd34;
       force `TOP_LEVEL.instr = i_op(32'b000_1000,0,2,10);@(posedge CLK);
       release `TOP_LEVEL.instr;
    endtask
-
  
-   initial begin
-      resetall();
+   task single_cycle;
+      tb_ctrl.resetall();
       $monitor("instr:%x",`TOP_LEVEL.instr);
       $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
-      // $readmemh("imem.h", `TOP_LEVEL.rf.regfile);
       for (int i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
          `TOP_LEVEL.dmem.memory[i] = $urandom();
       end
-      // $readmemh("dmem.h", `TOP_LEVEL.dmem.memory);
-      // `TOP_LEVEL.rf.regfile[0] = $random;
       #10;
       test_lw();
       test_sw();
       #10;
-      resetall();
+      tb_ctrl.resetall();
       test_r_irs();
       #10;
       $readmemh("imem.h", `TOP_LEVEL.imem.memory);
       $readmemh("dmem.h", `TOP_LEVEL.dmem.memory);
       $readmemh("reg.h", `TOP_LEVEL.rf.regfile);
-      resetall();
+      tb_ctrl.resetall();
       #50;
-      // $writememh("reg.out.h", `TOP_LEVEL.rf.regfile);
       $writememh("mem.out.h", `TOP_LEVEL.dmem.memory);
+   endtask
+
+   task multi_cycle;
+      for (int i = 0; i < $size(`TOP_LEVEL.dmem.memory); i = i + 1) begin
+         `TOP_LEVEL.dmem.memory[i] = $urandom();
+      end
+      $readmemh("imem.h", `MULT_TOP_LEVEL.idmem.memory);
+      $readmemh("reg.h", `MULT_TOP_LEVEL.rf.regfile);
+      tb_ctrl.resetall();
+      #200;
+      $writememh("mem.out.h", `MULT_TOP_LEVEL.idmem.memory);
+   endtask
+
+   initial begin
+      // single_cycle();
+      multi_cycle();
       $finish;
    end
 
