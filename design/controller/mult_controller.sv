@@ -18,6 +18,7 @@ module mult_controller(
 );
 
   reg [ 2 : 0 ] state;
+  reg [ 2 : 0 ] next_state;
   `define FETCH          'd0
   `define DECODE         'd1
   `define MEM_ADR        'd2
@@ -28,10 +29,10 @@ module mult_controller(
   `define ALU_WRITE_BACK 'd7
   `define BRANCH         'd8
 
-  `define LW 6'b000000
-  `define SW 6'b000000
+  `define LW 6'b100011
+  `define SW 6'b101011
   `define TYPE_R 6'b000000
-  `define BEQ 6'b000000
+  `define BEQ 6'b000100
 
   wire [ 1 : 0 ] aluop;
 
@@ -48,12 +49,12 @@ module mult_controller(
     begin
       casex (state)
          //IDMEM2RF, IS_DST_RF, IS_DATA_ADDR, PC_SRC, ALU_SRCB_SEL, ALU_SRCA_SEL
-        `FETCH         : main_decoder_mux_sel = 'bx_x_x_0_01_0;
+        `FETCH         : main_decoder_mux_sel = 'bx_x_0_0_01_0;
         `DECODE        : main_decoder_mux_sel = 'bx_x_x_x_xx_x;
         `MEM_ADR       : main_decoder_mux_sel = 'bx_x_x_x_10_1;
-        `MEM_READ      : main_decoder_mux_sel = 'bx_x_x_1_xx_x;
+        `MEM_READ      : main_decoder_mux_sel = 'bx_x_1_x_xx_x;
         `MEM_WRITE_BACK: main_decoder_mux_sel = 'b1_0_x_x_xx_x;
-        `MEM_WRITE     : main_decoder_mux_sel = 'bx_x_x_1_xx_x;
+        `MEM_WRITE     : main_decoder_mux_sel = 'bx_x_1_x_xx_x;
         `EXECUTE       : main_decoder_mux_sel = 'bx_x_x_x_00_1;
         `ALU_WRITE_BACK: main_decoder_mux_sel = 'b0_1_x_x_xx_x;
         `BRANCH        : main_decoder_mux_sel = 'bx_x_x_1_00_1;
@@ -121,42 +122,44 @@ module mult_controller(
      if ( RST ) begin
         state <= `FETCH;
      end else begin
-        case(state)
-           `FETCH: 
-              state <= `DECODE;
-           `DECODE: begin
-              case(OP)
-                 `LW, `SW:
-                    state <= `MEM_ADR;
-                 `TYPE_R:
-                    state <= `EXECUTE;
-                 `BEQ:
-                    state <= `BRANCH;
-                 default:
-                    state <= 'bx;
-              endcase //(OP)
-           end
-           `MEM_ADR: begin
-              case(OP)
-                 `LW:
-                    state <= `MEM_READ;
-                 `SW:
-                    state <= `MEM_WRITE;
-                 default:
-                    state <= 'bx;
-              endcase //(OP)
-           end
-           `MEM_READ:
-              state <= `MEM_WRITE_BACK;
-           `EXECUTE:
-              state <= `ALU_WRITE_BACK;
-           `MEM_WRITE, `MEM_WRITE_BACK, `ALU_WRITE_BACK, `BRANCH:
-              state <= `FETCH;
-           default:
-              state <= 'dx;
-        endcase //(state)
-         
+        state <= next_state;
      end
   end
+ 
+  always@(*) begin
+     case(state)
+        `FETCH: 
+           next_state <= `DECODE;
+        `DECODE: begin
+           casex(OP)
+              `LW, `SW:
+                 next_state <= `MEM_ADR;
+              `TYPE_R:
+                 next_state <= `EXECUTE;
+              `BEQ:
+                 next_state <= `BRANCH;
+              default:
+                 next_state <= 'bx;
+           endcase //(OP)
+        end
+        `MEM_ADR: begin
+           casex(OP)
+              `LW:
+                 next_state <= `MEM_READ;
+              `SW:
+                 next_state <= `MEM_WRITE;
+              default:
+                 next_state <= 'bx;
+           endcase //(OP)
+        end
+        `MEM_READ:
+           next_state <= `MEM_WRITE_BACK;
+        `EXECUTE:
+           next_state <= `ALU_WRITE_BACK;
+        default:
+           next_state <= `FETCH;
+     endcase //(next_state)
+  end
+
 endmodule
 
